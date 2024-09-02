@@ -1,24 +1,22 @@
-name: Grant Team Permissions on Repository Creation
+name: Handle Repository Creation
 
 on:
   repository_dispatch:
     types: [repository-created]
 
 jobs:
-  add-team-permissions:
+  grant-permissions:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check if owner is tomer
-        id: check-owner
+      - name: Check if the owner is tomer
         run: |
           if [ "${{ github.event.client_payload.owner }}" != "tomer" ]; then
-            echo "Not the correct owner, skipping..."
+            echo "Owner is not tomer, skipping permission grant."
             exit 0
           fi
 
-      - name: Grant permissions to team
-        if: steps.check-owner.outputs.result != '0'
+      - name: Grant permissions to the team
         uses: octokit/request-action@v2.x
         with:
           route: PUT /orgs/:org/teams/:team_name/repos/:owner/:repo
