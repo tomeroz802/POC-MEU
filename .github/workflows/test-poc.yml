@@ -1,27 +1,33 @@
-name: Grant Permissions Manually
+name: Scheduled Permission Check
 
 on:
-  workflow_dispatch:
+  schedule:
+    - cron: '*/1 * * * *'  # Runs every minute
 
 jobs:
-  grant-permissions:
+  check-new-repos:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check if the owner is tomer
-        run: |
-          if [ "${{ github.event.inputs.owner }}" != "tomeroz802" ]; then
-            echo "Owner is not tomer, skipping permission grant."
-            exit 0
-          fi
-
-      - name: Grant permissions to the team
+      - name: List repositories
+        id: list_repos
         uses: octokit/request-action@v2.x
         with:
-          route: PUT /orgs/:org/teams/:team_name/repos/:owner/:repo
-          org: ${{ github.event.inputs.organization }}
-          team_name: your-team-name
-          owner: ${{ github.event.inputs.owner }}
-          repo: ${{ github.event.inputs.repo }}
+          route: GET /orgs/:org/repos
+          org: your-organization
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Apply permissions to new repositories
+        run: |
+          echo "Checking repositories..."
+          for repo in $(jq -r '.[].name' <<< "${{ steps.list_repos.outputs.data }}"); do
+            if [[ $repo == *"-new-repo-pattern-"* ]]; then
+              echo "Granting permissions to $repo..."
+              curl -X PUT \
+                -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                -H "Accept: application/vnd.github.v3+json" \
+                https://api.github.com/orgs/your-organization/teams/your-team-name/repos/your-organization/$repo \
+                -d '{"permission":"push"}'
+            fi
+          done
