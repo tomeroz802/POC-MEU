@@ -1,43 +1,20 @@
-name: Add POC File if Created by tomeroz802
+name: Grant Team Permissions on Repository Creation
 
 on:
   repository_dispatch:
     types: [repository-created]
-       
 
 jobs:
-  check_creator_and_add_file:
+  add-team-permissions:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Set up GitHub CLI
-      run: |
-        sudo apt-get install -y gh
-        echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
-
-    - name: Check Repository Creator
-      id: check_creator
-      run: |
-        creator=$(gh api repos/${{ github.repository }} --jq '.owner.login')
-        echo "Repository created by: $creator"
-        echo "::set-output name=creator::$creator"
-
-    - name: Clone the repository
-      if: steps.check_creator.outputs.creator == 'tomeroz802'
-      run: |
-        git clone https://github.com/${{ github.repository }}.git
-        cd $(basename ${{ github.repository }})
-
-    - name: Create POC file
-      if: steps.check_creator.outputs.creator == 'tomeroz802'
-      run: |
-        echo "POC worked!!" > POC.txt
-        git add POC.txt
-        git commit -m "Added POC file"
-
-    - name: Push changes
-      if: steps.check_creator.outputs.creator == 'tomeroz802'
-      run: |
-        git push
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Grant permissions to team
+        uses: octokit/request-action@v2.x
+        with:
+          route: PUT /orgs/:org/teams/:team_name/repos/:owner/:repo
+          org: ${{ github.event.client_payload.organization }}
+          team_name: your-team-name
+          owner: ${{ github.event.client_payload.owner }}
+          repo: ${{ github.event.client_payload.repo }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
