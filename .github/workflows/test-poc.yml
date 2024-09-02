@@ -10,7 +10,7 @@ jobs:
     steps:
       - name: Check if the owner is tomer
         run: |
-          if [ "${{ github.event.inputs.owner }}" != "tomer" ]; then
+          if [ "${{ github.event.inputs.owner }}" != "tomeroz802" ]; then
             echo "Owner is not tomer, skipping permission grant."
             exit 0
           fi
