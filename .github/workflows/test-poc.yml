@@ -1,8 +1,9 @@
-name: Add POC File if Created by tomeroz
+name: Add POC File if Created by tomeroz802
 
 on:
-  repository:
-    types: [created]
+  repository_dispatch:
+    types: [repository-created]
+       
 
 jobs:
   check_creator_and_add_file:
