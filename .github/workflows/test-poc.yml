@@ -1,8 +1,7 @@
-name: Handle Repository Creation
+name: Grant Permissions Manually
 
 on:
-  repository_dispatch:
-    types: [repository-created]
+  workflow_dispatch:
 
 jobs:
   grant-permissions:
@@ -11,7 +10,7 @@ jobs:
     steps:
       - name: Check if the owner is tomer
         run: |
-          if [ "${{ github.event.client_payload.owner }}" != "tomer" ]; then
+          if [ "${{ github.event.inputs.owner }}" != "tomer" ]; then
             echo "Owner is not tomer, skipping permission grant."
             exit 0
           fi
@@ -20,9 +19,9 @@ jobs:
         uses: octokit/request-action@v2.x
         with:
           route: PUT /orgs/:org/teams/:team_name/repos/:owner/:repo
-          org: ${{ github.event.client_payload.organization }}
+          org: ${{ github.event.inputs.organization }}
           team_name: your-team-name
-          owner: ${{ github.event.client_payload.owner }}
-          repo: ${{ github.event.client_payload.repo }}
+          owner: ${{ github.event.inputs.owner }}
+          repo: ${{ github.event.inputs.repo }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
