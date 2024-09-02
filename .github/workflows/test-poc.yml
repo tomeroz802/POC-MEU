@@ -1,0 +1,42 @@
+name: Add POC File if Created by tomeroz
+
+on:
+  repository:
+    types: [created]
+
+jobs:
+  check_creator_and_add_file:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Set up GitHub CLI
+      run: |
+        sudo apt-get install -y gh
+        echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+
+    - name: Check Repository Creator
+      id: check_creator
+      run: |
+        creator=$(gh api repos/${{ github.repository }} --jq '.owner.login')
+        echo "Repository created by: $creator"
+        echo "::set-output name=creator::$creator"
+
+    - name: Clone the repository
+      if: steps.check_creator.outputs.creator == 'tomeroz'
+      run: |
+        git clone https://github.com/${{ github.repository }}.git
+        cd $(basename ${{ github.repository }})
+
+    - name: Create POC file
+      if: steps.check_creator.outputs.creator == 'tomeroz'
+      run: |
+        echo "POC worked!!" > POC.txt
+        git add POC.txt
+        git commit -m "Added POC file"
+
+    - name: Push changes
+      if: steps.check_creator.outputs.creator == 'tomeroz'
+      run: |
+        git push
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
