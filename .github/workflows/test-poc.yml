@@ -2,7 +2,7 @@ name: Check and Assign Permissions
 
 on:
   schedule:
-    - cron: '*/1 * * * *' # Runs every minute
+    - cron: '* * * * *' # Runs every minute
 
 jobs:
   check-repos:
