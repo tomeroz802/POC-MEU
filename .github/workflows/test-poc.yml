@@ -22,20 +22,20 @@ jobs:
         echo "::set-output name=creator::$creator"
 
     - name: Clone the repository
-      if: steps.check_creator.outputs.creator == 'tomeroz'
+      if: steps.check_creator.outputs.creator == 'tomeroz802'
       run: |
         git clone https://github.com/${{ github.repository }}.git
         cd $(basename ${{ github.repository }})
 
     - name: Create POC file
-      if: steps.check_creator.outputs.creator == 'tomeroz'
+      if: steps.check_creator.outputs.creator == 'tomeroz802'
       run: |
         echo "POC worked!!" > POC.txt
         git add POC.txt
         git commit -m "Added POC file"
 
     - name: Push changes
-      if: steps.check_creator.outputs.creator == 'tomeroz'
+      if: steps.check_creator.outputs.creator == 'tomeroz802'
       run: |
         git push
       env:
