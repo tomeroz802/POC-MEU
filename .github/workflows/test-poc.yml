@@ -1,33 +1,32 @@
-name: Scheduled Permission Check
+name: Setup New Repository
 
 on:
-  schedule:
-    - cron: '*/1 * * * *'  # Runs every minute
+  repository:
+    types: [created]
 
 jobs:
-  check-new-repos:
+  setup-repo:
     runs-on: ubuntu-latest
 
     steps:
-      - name: List repositories
-        id: list_repos
-        uses: octokit/request-action@v2.x
-        with:
-          route: GET /orgs/:org/repos
-          org: your-organization
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Apply permissions to new repositories
+      - name: Assign team permissions
         run: |
-          echo "Checking repositories..."
-          for repo in $(jq -r '.[].name' <<< "${{ steps.list_repos.outputs.data }}"); do
-            if [[ $repo == *"-new-repo-pattern-"* ]]; then
-              echo "Granting permissions to $repo..."
-              curl -X PUT \
-                -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-                -H "Accept: application/vnd.github.v3+json" \
-                https://api.github.com/orgs/your-organization/teams/your-team-name/repos/your-organization/$repo \
-                -d '{"permission":"push"}'
-            fi
-          done
+          curl -X PUT \
+            -H "Authorization: token ${{ secrets.AutomationToken }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/orgs/your-org/teams/your-team/repos/${{ github.repository_owner }}/${{ github.event.repository.name }} \
+            -d '{"permission":"push"}'
+
+      - name: Grant repo owner admin permissions
+        run: |
+          REPO_OWNER=$(curl -s \
+            -H "Authorization: token ${{ secrets.AutomationToken }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/${{ github.repository_owner }}/${{ github.event.repository.name }} \
+            | jq -r .owner.login)
+          
+          curl -X PUT \
+            -H "Authorization: token ${{ secrets.AutomationToken }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/${{ github.repository_owner }}/${{ github.event.repository.name }}/collaborators/$REPO_OWNER \
+            -d '{"permission":"admin"}'
