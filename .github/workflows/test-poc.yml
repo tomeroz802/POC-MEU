@@ -1,34 +1,15 @@
-name: Check and Assign Permissions
+name: Trigger on Repo Creation
 
 on:
-  schedule:
-    - cron: '* * * * *' # Runs every minute
+  repository_dispatch:
+    types: [repo_created]
 
 jobs:
-  check-repos:
+  run-on-repo-create:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Check for new repositories
-        run: |
-          # Fetch the list of repositories
-          repos=$(curl -s -H "Authorization: token ${{ secrets.AutomationToken }}" \
-                       -H "Accept: application/vnd.github.v3+json" \
-                       https://api.github.com/orgs/your-org/repos?type=all&per_page=100)
-
-          # Loop through the repositories and assign permissions if needed
-          for repo in $(echo "$repos" | jq -r '.[].name'); do
-            # Check if the team has already been added
-            team_access=$(curl -s -H "Authorization: token ${{ secrets.AutomationToken }}" \
-                                -H "Accept: application/vnd.github.v3+json" \
-                                https://api.github.com/orgs/your-org/teams/your-team/repos/your-org/$repo)
-
-            if [ "$team_access" != "200" ]; then
-              echo "Assigning permissions to $repo"
-              curl -X PUT \
-                   -H "Authorization: token ${{ secrets.AutomationToken }}" \
-                   -H "Accept: application/vnd.github.v3+json" \
-                   https://api.github.com/orgs/your-org/teams/your-team/repos/your-org/$repo \
-                   -d '{"permission":"push"}'
-            fi
-          done
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      
+      - name: Run your script or action
+        run: echo "Repository created! Running custom actions."
