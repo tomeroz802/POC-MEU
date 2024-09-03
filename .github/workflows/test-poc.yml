@@ -23,7 +23,7 @@ jobs:
       - name: Check if Tomer created the repo
         env:
           GITHUB_TOKEN: ${{ secrets.AUTOMATIONTOKEN }}
-          TOMER_USERNAME: "YOUR_USERNAME"  # Your GitHub username
+          TOMER_USERNAME: "tomeroz802"  # Your GitHub username
         run: |
           while read repo; do
             repo_info=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
