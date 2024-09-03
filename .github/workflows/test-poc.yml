@@ -33,10 +33,7 @@ jobs:
             creator=$(echo "$repo_info" | jq -r '.owner.type')
               
             if [ "$owner" == "$TOMER_USERNAME" ] && [ "$creator" == "User" ]; then
-              echo "Tomer created $repo, adding tickets group"
-              curl -s -H "Authorization: token $GITHUB_TOKEN" \
-                -X PUT -d '{"permission":"push"}' \
-                https://api.github.com/repos/$TOMER_USERNAME/$repo/collaborators/tickets
+              echo "Tomer created $repo"
             else
               echo "$repo was not created by Tomer"
             fi
