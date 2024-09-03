@@ -34,10 +34,7 @@ jobs:
             fork=$(echo "$repo_info" | jq -r '.fork')
               
             if [ "$owner" == "$TOMER_USERNAME" ] && [ "$creator" == "User" ] && [ "$fork" == "false" ]; then
-              echo "Tomer created $repo and it is not a fork, adding tickets group"
-              curl -s -H "Authorization: token $GITHUB_TOKEN" \
-                -X PUT -d '{"permission":"push"}' \
-                https://api.github.com/repos/$TOMER_USERNAME/$repo/collaborators/tickets
+              echo "Tomer created $repo and it is not a fork"
             else
               echo "$repo was not created by Tomer or is a fork"
             fi
