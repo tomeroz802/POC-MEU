@@ -1,4 +1,4 @@
-name: Check Repositories for Tomer Creations
+name: Check Repositories for tomeroz802 Creations
 
 on:
   schedule:
@@ -13,28 +13,28 @@ jobs:
 
       - name: List all repositories
         env:
-          GITHUB_TOKEN: ${{ secrets.ACTIONS_PAT }}
+          GITHUB_TOKEN: ${{ secrets.AUTOMATIONTOKEN }}
         run: |
           curl -s -H "Authorization: token $GITHUB_TOKEN" \
           https://api.github.com/user/repos?per_page=100 \
           | jq -r '.[] | .name' > repo_list.txt
 
-      - name: Check if Tomer created the repo
+      - name: Check if tomeroz802 created the repo
         env:
-          GITHUB_TOKEN: ${{ secrets.ACTIONS_PAT }}
-          TOMER_USERNAME: "tomer"  # Your GitHub username
+          GITHUB_TOKEN: ${{ secrets.AUTOMATIONTOKEN }}
+          tomeroz802_USERNAME: "tomeroz802"  # Your GitHub username
         run: |
           while read repo; do
             creator=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
               https://api.github.com/repos/YOUR_USERNAME/$repo \
               | jq -r '.owner.login')
               
-            if [ "$creator" == "$TOMER_USERNAME" ]; then
-              echo "Tomer created $repo, adding tickets group"
+            if [ "$creator" == "$tomeroz802_USERNAME" ]; then
+              echo "tomeroz802 created $repo, adding tickets group"
               curl -s -H "Authorization: token $GITHUB_TOKEN" \
                 -X PUT -d '{"permission":"push"}' \
                 https://api.github.com/repos/YOUR_USERNAME/$repo/collaborators/tickets
             else
-              echo "$repo was not created by Tomer"
+              echo "$repo was not created by tomeroz802"
             fi
           done < repo_list.txt
