@@ -2,7 +2,7 @@ name: Cron Job Test
 
 on:
   schedule:
-    - cron: '*/1 * * * *'  # Runs every 5 minutes
+    - cron: '* * * * *'  # Runs every 5 minutes
   workflow_dispatch:  # Allows manual triggering of the workflow
 
 jobs:
