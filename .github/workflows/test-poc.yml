@@ -1,15 +1,40 @@
-name: Trigger on Repo Creation
+name: Check Repositories for Tomer Creations
 
 on:
-  repository_dispatch:
-    types: [repo_created]
+  schedule:
+    - cron: '*/5 * * * *'  # Runs every 5 minutes
 
 jobs:
-  run-on-repo-create:
+  check_repos:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
-      
-      - name: Run your script or action
-        run: echo "Repository created! Running custom actions."
+        uses: actions/checkout@v3
+
+      - name: List all repositories
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACTIONS_PAT }}
+        run: |
+          curl -s -H "Authorization: token $GITHUB_TOKEN" \
+          https://api.github.com/user/repos?per_page=100 \
+          | jq -r '.[] | .name' > repo_list.txt
+
+      - name: Check if Tomer created the repo
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACTIONS_PAT }}
+          TOMER_USERNAME: "tomer"  # Your GitHub username
+        run: |
+          while read repo; do
+            creator=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+              https://api.github.com/repos/YOUR_USERNAME/$repo \
+              | jq -r '.owner.login')
+              
+            if [ "$creator" == "$TOMER_USERNAME" ]; then
+              echo "Tomer created $repo, adding tickets group"
+              curl -s -H "Authorization: token $GITHUB_TOKEN" \
+                -X PUT -d '{"permission":"push"}' \
+                https://api.github.com/repos/YOUR_USERNAME/$repo/collaborators/tickets
+            else
+              echo "$repo was not created by Tomer"
+            fi
+          done < repo_list.txt
