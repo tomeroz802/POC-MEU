@@ -14,7 +14,7 @@ jobs:
 
       - name: List all repositories
         env:
-          GITHUB_TOKEN: ${{ secrets.AUTOMATIONTOKEN }}
+          GITHUB_TOKEN: ${{ github.token }} 
         run: |
           curl -s -H "Authorization: token $GITHUB_TOKEN" \
           https://api.github.com/user/repos?per_page=100 \
@@ -22,7 +22,7 @@ jobs:
 
       - name: Check if Tomer created the repo and it’s not a fork
         env:
-          GITHUB_TOKEN: ${{ secrets.AUTOMATIONTOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
           TOMER_USERNAME: "tomeroz802"  # Your GitHub username
         run: |
           while read repo; do
