@@ -28,10 +28,10 @@ jobs:
           while read repo; do
             repo_info=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
               https://api.github.com/repos/$TOMER_USERNAME/$repo)
-
+              
             owner=$(echo "$repo_info" | jq -r '.owner.login')
             creator=$(echo "$repo_info" | jq -r '.owner.type')
-              
+            echo "$repo_info"
             if [ "$owner" == "$TOMER_USERNAME" ] && [ "$creator" == "User" ]; then
               echo "Tomer created $repo"
             else
