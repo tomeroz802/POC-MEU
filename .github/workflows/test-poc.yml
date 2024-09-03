@@ -16,8 +16,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
+          # Retrieve the list of repositories the token has access to
           response=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-          https://api.github.com/user/repos?per_page=100)
+          https://api.github.com/orgs/ORG_NAME/repos?per_page=100)  # Replace ORG_NAME with your organization
 
           # Print the raw response for debugging purposes
           echo "API Response: $response"
